@@ -4,7 +4,7 @@ export type ExtractMap = Record<string, ExtractRule> | undefined;
 
 function ruleToNormalized(rule: ExtractRule): {
   selector: string;
-  kind: "text" | "html" | "attr";
+  kind: "text" | "html" | "attr" | "image";
   attr?: string;
 } {
   if (typeof rule === "string") {
@@ -40,6 +40,24 @@ export async function extractItemFields(
         out[key] = (await handle.textContent())?.trim() ?? "";
       } else if (norm.kind === "html") {
         out[key] = await handle.evaluate((n) => n.outerHTML ?? "");
+      } else if (norm.kind === "image") {
+        let url = (await handle.getAttribute("src"))?.trim() ?? "";
+        if (!url) {
+          url = await handle.evaluate((n) => {
+            const el = n as Element;
+            const img =
+              el.tagName === "IMG"
+                ? el
+                : el.querySelector("img") ??
+                  el.closest("picture")?.querySelector("img");
+            if (!img || img.tagName !== "IMG") {
+              return "";
+            }
+            const i = img as HTMLImageElement;
+            return i.currentSrc || i.src || "";
+          });
+        }
+        out[key] = url.trim();
       } else {
         const name = norm.attr;
         if (!name) {

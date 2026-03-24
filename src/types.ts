@@ -4,7 +4,7 @@ const extractRuleSchema = z.union([
   z.string().min(1),
   z.object({
     selector: z.string().min(1),
-    type: z.enum(["text", "html", "attr"]),
+    type: z.enum(["text", "html", "attr", "image"]),
     attr: z.string().optional()
   })
 ]);
