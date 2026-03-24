@@ -28,15 +28,22 @@ npm run build
 unpaginate run --config ./my.config.json [--out-dir ./out] [--headed] [--storage-state ./auth.json]
 ```
 
+To add **`itemNumber`** (1, 2, 3, …) to older exports in a folder and refresh their HTML reports:
+
+```bash
+unpaginate backfill-item-numbers [--out-dir ./out]
+```
+
 - **`--config`**: Path to a JSON config file (see below).
-- **`--out-dir`**: Where to write `results.json` and `report.html` (default: `./out`).
+- **`--out-dir`**: Where to write output files (default: `./out`).
+- **`--fixed-names`**: Write `results.json` and `report.html` instead of datetime-stamped names.
 - **`--headed`**: Run Chromium with a visible window (helpful for debugging selectors).
 - **`--storage-state`**: Path to a Playwright storage state file (cookies/session) saved after logging in once.
 
-Outputs:
+Outputs (by default, both files share one local timestamp, e.g. `results-2025-03-24T17-05-30.json` and `report-2025-03-24T17-05-30.html`):
 
-- **`results.json`**: `{ "meta": { "stoppedReason", "generatedAt", "count" }, "results": [ ... ] }`
-- **`report.html`**: Same data rendered as a table, plus embedded JSON in `<script type="application/json" id="unpaginate-data">`.
+- **`results-….json`**: `{ "meta": { "stoppedReason", "generatedAt", "count" }, "results": [ ... ] }`. Each row includes **`itemNumber`** (1-based) for the full run.
+- **`report-….html`**: Same data rendered as a table (first column `itemNumber`), plus embedded JSON in `<script type="application/json" id="unpaginate-data">`.
 
 ## Config
 
@@ -107,4 +114,5 @@ const { results, stoppedReason } = await runUnpaginate(config, {
   storageStatePath: "./auth.json"
 });
 await writeOutputs("./out", results, { stoppedReason });
+// Optional: `fixedNames: true` → results.json / report.html; or set `fileStamp` to reuse a suffix.
 ```

@@ -3,6 +3,10 @@
   "itemSelector": "li.bc-list-item[id^=\"product-list-item-\"]",
   "extract": {
     "title": { "selector": "h3.bc-heading", "type": "text" },
+    "author": { "selector": ".authorLabel", "type": "text" },
+    "narrator": { "selector": ".narratorLabel", "type": "text" },
+    "duration": { "selector": ".runtimeLabel", "type": "text" },
+    "cover": { "selector": "picture img", "type": "image" },
     "href": {
       "selector": "a[href*=\"/pd/\"]",
       "type": "attr",
@@ -15,6 +19,6 @@
     "start": 1,
     "step": 1
   },
-  "maxPages": 100,
+  "maxPages": 26,
   "dedupeBy": "href"
 }
