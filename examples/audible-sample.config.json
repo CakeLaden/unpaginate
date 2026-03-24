@@ -1,0 +1,14 @@
+{
+  "startUrl": "https://www.audible.com/special-promo/2for1/cat?node=120291920011&pageSize=50",
+  "itemSelector": ".bc-list-item",
+  "extract": {
+    "title": { "selector": "h3", "type": "text" },
+    "href": { "selector": "a[href]", "type": "attr", "attr": "href" }
+  },
+  "pagination": {
+    "type": "nextLink",
+    "selector": ".nextButton not([aria-disabled='true'])"
+  },
+  "maxPages": 50,
+  "dedupeBy": "href"
+}
