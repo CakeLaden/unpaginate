@@ -1,6 +1,7 @@
 node_modules/
 dist/
 out/
+examples/source/
 *.log
 .DS_Store
 auth.json
