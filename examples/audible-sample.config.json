@@ -1,14 +1,20 @@
 {
-  "startUrl": "https://www.audible.com/special-promo/2for1/cat?node=120291920011&pageSize=50",
-  "itemSelector": ".bc-list-item",
+  "startUrl": "https://www.audible.com/special-promo/2for1/cat?node=120291920011&pageSize=50&ref=a_special-p_c4_pageSize_3&page=1",
+  "itemSelector": "li.bc-list-item[id^=\"product-list-item-\"]",
   "extract": {
-    "title": { "selector": "h3", "type": "text" },
-    "href": { "selector": "a[href]", "type": "attr", "attr": "href" }
+    "title": { "selector": "h3.bc-heading", "type": "text" },
+    "href": {
+      "selector": "a[href*=\"/pd/\"]",
+      "type": "attr",
+      "attr": "href"
+    }
   },
   "pagination": {
-    "type": "nextLink",
-    "selector": ".nextButton not([aria-disabled='true'])"
+    "type": "paramIncrement",
+    "param": "page",
+    "start": 1,
+    "step": 1
   },
-  "maxPages": 50,
+  "maxPages": 100,
   "dedupeBy": "href"
 }
