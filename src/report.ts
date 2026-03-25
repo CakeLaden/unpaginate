@@ -134,7 +134,7 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     Count: ${payload.meta.count} ·
     ${escapeHtml(payload.meta.generatedAt)}
   </p>
-  <p class="meta" style="font-size: 13px;">Sort by clicking headers. Filter with inputs under headers. Drag column headers to reorder. Use the page size control for long lists.</p>
+  <p class="meta" style="font-size: 13px;">Sort by clicking headers. Filter with inputs under headers. <strong>itemNumber</strong> accepts a comma-separated list (e.g. <code>1, 3, 300</code>); invalid tokens are ignored. Drag column headers to reorder. Use the page size control for long lists.</p>
   <div id="grid"></div>
   <script type="application/json" id="unpaginate-data">${dataJson}</script>
   <script src="https://unpkg.com/tabulator-tables@${TABULATOR_VERSION}/dist/js/tabulator.min.js"></script>
@@ -179,8 +179,79 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     }
     return o;
   }
+  function allColumnKeys(tableRows) {
+    var seen = {};
+    var keys = [];
+    function add(k) {
+      if (!seen[k]) {
+        seen[k] = true;
+        keys.push(k);
+      }
+    }
+    add("itemNumber");
+    add("pageIndex");
+    add("pageUrl");
+    for (var i = 0; i < tableRows.length; i++) {
+      var row = tableRows[i];
+      for (var k in row) {
+        if (k !== "itemNumber" && k !== "pageIndex" && k !== "pageUrl") {
+          add(k);
+        }
+      }
+    }
+    return keys;
+  }
+  function parseItemNumberFilter(headerValue) {
+    var wanted = [];
+    var parts = String(headerValue || "").split(/[,\s]+/);
+    for (var i = 0; i < parts.length; i++) {
+      var t = parts[i].trim();
+      if (!t) continue;
+      var n = parseInt(t, 10);
+      if (!isNaN(n)) wanted.push(n);
+    }
+    return wanted;
+  }
+  function cellFormatter(cell) {
+    var v = cell.getValue();
+    var col = cell.getField();
+    if (v === null || v === undefined) return "";
+    if (typeof v === "object") return esc(JSON.stringify(v));
+    var s = String(v);
+    if (isImgCell(col, s)) {
+      return '<div class="cell-image"><img src="' + esc(s) + '" alt="" loading="lazy" decoding="async" /></div>';
+    }
+    return esc(s);
+  }
   var payload = JSON.parse(document.getElementById("unpaginate-data").textContent);
   var rows = payload.results.map(flattenRow);
+  var keys = allColumnKeys(rows);
+  var columns = keys.map(function (field) {
+    var def = {
+      field: field,
+      title: field,
+      headerFilter: "input",
+      headerFilterPlaceholder: field === "itemNumber" ? "e.g. 1, 3, 300" : "Filter…",
+      formatter: cellFormatter
+    };
+    if (field === "itemNumber") {
+      def.headerFilterFunc = function (headerValue, rowValue, rowData, filterParams) {
+        if (headerValue === "" || headerValue === null || headerValue === undefined) {
+          return true;
+        }
+        var wanted = parseItemNumberFilter(headerValue);
+        if (wanted.length === 0) {
+          return true;
+        }
+        var rv = Number(rowValue);
+        if (isNaN(rv)) {
+          return false;
+        }
+        return wanted.indexOf(rv) !== -1;
+      };
+    }
+    return def;
+  });
   new Tabulator("#grid", {
     data: rows,
     layout: "fitColumns",
@@ -190,22 +261,7 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     paginationSizeSelector: [25, 50, 100, 500],
     paginationCounter: "rows",
     movableColumns: true,
-    autoColumns: true,
-    columnDefaults: {
-      headerFilter: "input",
-      headerFilterPlaceholder: "Filter…",
-      formatter: function (cell) {
-        var v = cell.getValue();
-        var col = cell.getField();
-        if (v === null || v === undefined) return "";
-        if (typeof v === "object") return esc(JSON.stringify(v));
-        var s = String(v);
-        if (isImgCell(col, s)) {
-          return '<div class="cell-image"><img src="' + esc(s) + '" alt="" loading="lazy" decoding="async" /></div>';
-        }
-        return esc(s);
-      }
-    }
+    columns: columns
   });
 })();
   </script>

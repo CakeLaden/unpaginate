@@ -43,7 +43,7 @@ unpaginate backfill-item-numbers [--out-dir ./out]
 Outputs (by default, both files share one local timestamp, e.g. `results-2025-03-24T17-05-30.json` and `report-2025-03-24T17-05-30.html`):
 
 - **`results-….json`**: `{ "meta": { "stoppedReason", "generatedAt", "count" }, "results": [ ... ] }`. Each row includes **`itemNumber`** (1-based) for the full run.
-- **`report-….html`**: Interactive grid ([Tabulator](https://tabulator.info/) via CDN): sort, per-column filter, column reorder, pagination; image URLs in cells render as thumbnails where detected. Raw JSON remains in `<script type="application/json" id="unpaginate-data">` (requires network for CDN scripts).
+- **`report-….html`**: Interactive grid ([Tabulator](https://tabulator.info/) via CDN): sort, per-column filter, column reorder, pagination; image URLs in cells render as thumbnails where detected. The **itemNumber** filter accepts a comma-separated list (e.g. `1, 3, 300`); non-numeric tokens are ignored. Raw JSON remains in `<script type="application/json" id="unpaginate-data">` (requires network for CDN scripts).
 
 ## Config
 
