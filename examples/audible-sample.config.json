@@ -19,6 +19,8 @@
     "start": 1,
     "step": 1
   },
-  "maxPages": 26,
+  "maxPages": 15,
+  "delayMs": 400,
+  "emptyPagesBeforeStop": 2,
   "dedupeBy": "href"
 }

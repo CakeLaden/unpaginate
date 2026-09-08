@@ -1,0 +1,22 @@
+{
+  "startUrl": "https://www.amazon.com/s?i=digital-text&srs=219547365011&rh=n%3A219547365011&s=popularity-rank&fs=true&ref=lp_219547365011_sar",
+  "itemSelector": "div[data-component-type=\"s-search-result\"]",
+  "extract": {
+    "title": { "selector": "h2 span", "type": "text" },
+    "author": {
+      "selector": ".a-row.a-size-base.a-color-secondary",
+      "type": "text"
+    },
+    "cover": { "selector": "img.s-image", "type": "attr", "attr": "src" },
+    "href": { "selector": "h2 a", "type": "attr", "attr": "href" }
+  },
+  "pagination": {
+    "type": "nextLink",
+    "selector": ".s-pagination-next",
+    "disabledSelector": ".s-pagination-disabled"
+  },
+  "maxPages": 100,
+  "delayMs": 400,
+  "dedupeBy": "href",
+  "emptyPagesBeforeStop": 2
+}

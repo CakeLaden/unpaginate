@@ -1,0 +1,23 @@
+{
+  "startUrl": "https://www.audible.com/library/wishlist?pageSize=50&page=1",
+  "itemSelector": "li.bc-list-item.productListItem",
+  "extract": {
+    "title": { "selector": "h2.bc-heading", "type": "text" },
+    "author": { "selector": "span.bc-text", "type": "text" },
+    "narrator": { "selector": "span.bc-text", "type": "text" },
+    "duration": { "selector": "span.bc-text", "type": "text" },
+    "href": {
+      "selector": "a[href*=\"/pd/\"]",
+      "type": "attr",
+      "attr": "href"
+    }
+  },
+  "pagination": {
+    "type": "paramIncrement",
+    "param": "page",
+    "start": 1,
+    "step": 1
+  },
+  "maxPages": 20,
+  "dedupeBy": "href"
+}
