@@ -135,6 +135,12 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     ${escapeHtml(payload.meta.generatedAt)}
   </p>
   <p class="meta" style="font-size: 13px;">Sort by clicking headers. Filter with inputs under headers. <strong>itemNumber</strong> accepts a comma-separated list (e.g. <code>1, 3, 300</code>); invalid tokens are ignored. Drag column headers to reorder. Use the page size control for long lists.</p>
+  <p class="meta" id="unpaginate-review-toolbar" style="font-size: 13px;">
+    <strong>Review:</strong>
+    check <strong>Hide</strong> on a row to remove it from the table (session only; refresh restores everything).
+    <button type="button" id="unpaginate-show-all-rows" style="margin-left: 0.5rem;">Show all hidden rows</button>
+    <span id="unpaginate-hidden-count-wrap" style="margin-left: 0.35rem;">(<span id="unpaginate-hidden-count">0</span> hidden)</span>
+  </p>
   <div id="grid"></div>
   <script type="application/json" id="unpaginate-data">${dataJson}</script>
   <script src="https://unpkg.com/tabulator-tables@${TABULATOR_VERSION}/dist/js/tabulator.min.js"></script>
@@ -194,6 +200,7 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     for (var i = 0; i < tableRows.length; i++) {
       var row = tableRows[i];
       for (var k in row) {
+        if (k === "__rowUid") continue;
         if (k !== "itemNumber" && k !== "pageIndex" && k !== "pageUrl") {
           add(k);
         }
@@ -225,6 +232,14 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
   }
   var payload = JSON.parse(document.getElementById("unpaginate-data").textContent);
   var rows = payload.results.map(flattenRow);
+  for (var ri = 0; ri < rows.length; ri++) {
+    rows[ri].__rowUid = ri;
+  }
+  var hiddenRowUids = new Set();
+  function updateHiddenCount() {
+    var el = document.getElementById("unpaginate-hidden-count");
+    if (el) el.textContent = String(hiddenRowUids.size);
+  }
   var keys = allColumnKeys(rows);
   var columns = keys.map(function (field) {
     var def = {
@@ -252,7 +267,41 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     }
     return def;
   });
-  new Tabulator("#grid", {
+  var hideColumn = {
+    title: "Hide",
+    field: "__hideUi",
+    width: 72,
+    minWidth: 72,
+    hozAlign: "center",
+    vertAlign: "middle",
+    headerSort: false,
+    headerFilter: false,
+    resizable: false,
+    formatter: function (cell) {
+      var wrap = document.createElement("div");
+      wrap.style.paddingTop = "6px";
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.title = "Hide this row (until you click Show all hidden rows or refresh the page)";
+      cb.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+      cb.addEventListener("change", function () {
+        var data = cell.getRow().getData();
+        var uid = data.__rowUid;
+        if (cb.checked) {
+          hiddenRowUids.add(uid);
+        } else {
+          hiddenRowUids.delete(uid);
+        }
+        table.refreshFilter();
+        updateHiddenCount();
+      });
+      wrap.appendChild(cb);
+      return wrap;
+    }
+  };
+  var table = new Tabulator("#grid", {
     data: rows,
     layout: "fitColumns",
     rowHeight: 200,
@@ -261,8 +310,20 @@ export function buildReportHtml(payload: ResultsFilePayload): string {
     paginationSizeSelector: [25, 50, 100, 500],
     paginationCounter: "rows",
     movableColumns: true,
-    columns: columns
+    columns: [hideColumn].concat(columns)
   });
+  table.setFilter(function (data) {
+    return !hiddenRowUids.has(data.__rowUid);
+  });
+  updateHiddenCount();
+  var showAllBtn = document.getElementById("unpaginate-show-all-rows");
+  if (showAllBtn) {
+    showAllBtn.addEventListener("click", function () {
+      hiddenRowUids.clear();
+      table.refreshFilter();
+      updateHiddenCount();
+    });
+  }
 })();
   </script>
 </body>
