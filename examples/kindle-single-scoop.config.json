@@ -1,0 +1,22 @@
+{
+  "startUrl": "https://www.amazon.com/s?i=digital-text&srs=219547361011&rh=n%3A219547361011&s=featured-rank&fs=true&ref=sr_st_featured-rank",
+  "itemSelector": "div[data-component-type=\"s-search-result\"]",
+  "extract": {
+    "title": { "selector": "h2 span", "type": "text" },
+    "author": {
+      "selector": ".a-row.a-size-base.a-color-secondary",
+      "type": "text"
+    },
+    "cover": { "selector": "img.s-image", "type": "attr", "attr": "src" },
+    "href": { "selector": "a[href*='/dp/']", "type": "attr", "attr": "href" }
+  },
+  "pagination": {
+    "type": "nextLink",
+    "selector": ".s-pagination-next",
+    "disabledSelector": ".s-pagination-disabled"
+  },
+  "maxPages": 200,
+  "delayMs": 400,
+  "dedupeBy": "href",
+  "emptyPagesBeforeStop": 2
+}
